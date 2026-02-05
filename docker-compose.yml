@@ -1,4 +1,25 @@
 services:
+  # MySQL Database (使用已有的外部 MySQL 容器)
+  mysql:
+    image: mysql:9.0.0
+    container_name: mysql
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=petclinic
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 3306:3306
+    volumes:
+      - /Users/hb26933/Container/data/mysql:/var/lib/mysql
+
   config-server:
     image: springcommunity/spring-petclinic-config-server
     container_name: config-server
@@ -11,6 +32,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=config-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
+    depends_on:
+      skywalking-oap:
+        condition: service_healthy
     ports:
      - 8888:8888
 
@@ -26,8 +57,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=discovery-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
       config-server:
+        condition: service_healthy
+      skywalking-oap:
         condition: service_healthy
     ports:
      - 8761:8761
@@ -39,10 +79,25 @@ services:
       resources:
         limits:
           memory: 512M
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=customers-service
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SPRING_PROFILES_ACTIVE=docker,mysql
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
+        condition: service_healthy
+      skywalking-oap:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
     ports:
     - 8081:8081
@@ -54,10 +109,25 @@ services:
       resources:
         limits:
           memory: 512M
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=visits-service
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SPRING_PROFILES_ACTIVE=docker,mysql
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
+        condition: service_healthy
+      skywalking-oap:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
     ports:
      - 8082:8082
@@ -69,14 +139,28 @@ services:
       resources:
         limits:
           memory: 512M
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=vets-service
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SPRING_PROFILES_ACTIVE=docker,mysql
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
+      skywalking-oap:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     ports:
      - 8083:8083
-
 
   genai-service:
     image: springcommunity/spring-petclinic-genai-service
@@ -85,6 +169,12 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
       - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=genai-service
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     deploy:
       resources:
         limits:
@@ -94,9 +184,10 @@ services:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
+      skywalking-oap:
+        condition: service_healthy
     ports:
      - 8084:8084
-
 
   api-gateway:
     image: springcommunity/spring-petclinic-api-gateway
@@ -105,23 +196,107 @@ services:
       resources:
         limits:
           memory: 512M
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=api-gateway
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
+      skywalking-oap:
+        condition: service_healthy
     ports:
      - 8080:8080
 
-  tracing-server:
-    image: openzipkin/zipkin
-    container_name: tracing-server
+  # Elasticsearch for SkyWalking storage
+  elasticsearch:
+    image: elasticsearch:7.17.12
+    container_name: elasticsearch
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch-data:/Users/hb26933/Container/data/elasticsearch/data
+
+  # SkyWalking OAP Server
+  skywalking-oap:
+    image: apache/skywalking-oap-server:9.7.0
+    container_name: skywalking-oap
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+      - SW_HEALTH_CHECKER=default
+      - SW_TELEMETRY=prometheus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:12800/internal/l7check"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - 11800:11800  # gRPC port for agent
+      - 12800:12800  # HTTP port for UI
+
+  # SkyWalking UI
+  skywalking-ui:
+    image: apache/skywalking-ui:9.7.0
+    container_name: skywalking-ui
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    depends_on:
+      skywalking-oap:
+        condition: service_healthy
+    environment:
+      - SW_OAP_ADDRESS=http://skywalking-oap:12800
+    ports:
+      - 9411:8080  # 使用原来的 9411 端口方便访问
+
+  # Kibana for Elasticsearch management
+  kibana:
+    image: kibana:7.17.26
+    container_name: kibana
     deploy:
       resources:
         limits:
           memory: 512M
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - I18N_LOCALE=zh-CN
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     ports:
-     - 9411:9411
+      - 5601:5601
 
   admin-server:
     image: springcommunity/spring-petclinic-admin-server
@@ -130,10 +305,19 @@ services:
       resources:
         limits:
           memory: 512M
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - SW_AGENT_NAME=admin-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+    volumes:
+      - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
+        condition: service_healthy
+      skywalking-oap:
         condition: service_healthy
     ports:
      - 9090:9090
@@ -159,3 +343,7 @@ services:
           memory: 256M
     ports:
     - 9091:9090
+
+volumes:
+  elasticsearch-data:
+    driver: local
