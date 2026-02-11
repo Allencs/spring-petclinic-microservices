@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <!-- Required for Loglevel managment into the Spring Petclinic Admin Server-->
-    <jmxConfigurator/>
+<configuration packagingData="false">
+    <!-- SkyWalking TraceId 变量 -->
+    <property name="SW_CONSOLE_PATTERN"
+              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) [%blue(%thread)] [%tid] %highlight(%-5level) %green(%logger) - %cyan(%msg%n)"/>
+    <property name="SW_FILE_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%tid] %-5level %logger{50} - %msg%n"/>
+
+    <!-- 控制台输出（带 TraceId） -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>${SW_CONSOLE_PATTERN}</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <!-- 文件输出（带 TraceId） -->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/customers.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/customers.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>${SW_FILE_PATTERN}</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <!-- SkyWalking gRPC 日志上报 Appender -->
+    <appender name="SW_GRPC_LOG" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.TraceIdMDCPatternLogbackLayout">
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <!-- 异步文件输出 appender -->
+    <appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <maxFlushTime>1000</maxFlushTime>
+        <appender-ref ref="file"/>
+    </appender>
+
+    <!-- 异步 SkyWalking 日志上报 -->
+    <appender name="ASYNC-SW-GRPC" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="SW_GRPC_LOG"/>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="ASYNC-FILE"/>
+        <appender-ref ref="ASYNC-SW-GRPC"/>
+    </root>
 </configuration>

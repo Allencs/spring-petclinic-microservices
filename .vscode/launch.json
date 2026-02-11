@@ -1,0 +1,79 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "SpringBootAdminApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.admin.SpringBootAdminApplication",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "projectName": "spring-petclinic-admin-server"
+        },
+        {
+            "type": "java",
+            "name": "ApiGatewayApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.api.ApiGatewayApplication",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "projectName": "spring-petclinic-api-gateway"
+        },
+        {
+            "type": "java",
+            "name": "ConfigServerApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.config.ConfigServerApplication",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "projectName": "spring-petclinic-config-server"
+        },
+        {
+            "type": "java",
+            "name": "CustomersServiceApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.customers.CustomersServiceApplication",
+            "vmArgs": "-Dspring.profiles.active=local -Dspring.cloud.config.enabled=false -Dspring.datasource.url=jdbc:mysql://localhost:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true -Dspring.datasource.username=root -Dspring.datasource.password=123456 -Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver -Dspring.jpa.database-platform=org.hibernate.dialect.MySQLDialect -Dspring.sql.init.schema-locations=classpath*:db/mysql/schema.sql -Dspring.sql.init.data-locations=classpath*:db/mysql/data.sql",
+            "projectName": "spring-petclinic-customers-service"
+        },
+        {
+            "type": "java",
+            "name": "DiscoveryServerApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.discovery.DiscoveryServerApplication",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "projectName": "spring-petclinic-discovery-server"
+        },
+        {
+            "type": "java",
+            "name": "GenAIServiceApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.genai.GenAIServiceApplication",
+            "vmArgs": "-Dspring.profiles.active=local",
+            "projectName": "spring-petclinic-genai-service"
+        },
+        {
+            "type": "java",
+            "name": "VetsServiceApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.vets.VetsServiceApplication",
+            "vmArgs": "-Dspring.profiles.active=local -Dspring.cloud.config.enabled=false -Dspring.datasource.url=jdbc:mysql://localhost:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true -Dspring.datasource.username=root -Dspring.datasource.password=123456 -Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver -Dspring.jpa.database-platform=org.hibernate.dialect.MySQLDialect -Dspring.sql.init.schema-locations=classpath*:db/mysql/schema.sql -Dspring.sql.init.data-locations=classpath*:db/mysql/data.sql",
+            "projectName": "spring-petclinic-vets-service"
+        },
+        {
+            "type": "java",
+            "name": "VisitsServiceApplication",
+            "request": "launch",
+            "mainClass": "org.springframework.samples.petclinic.visits.VisitsServiceApplication",
+            "vmArgs": "-Dspring.profiles.active=local -Dspring.cloud.config.enabled=false -Dspring.datasource.url=jdbc:mysql://localhost:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true -Dspring.datasource.username=root -Dspring.datasource.password=123456 -Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver -Dspring.jpa.database-platform=org.hibernate.dialect.MySQLDialect -Dspring.sql.init.schema-locations=classpath*:db/mysql/schema.sql -Dspring.sql.init.data-locations=classpath*:db/mysql/data.sql",
+            "projectName": "spring-petclinic-visits-service"
+        }
+    ]
+}

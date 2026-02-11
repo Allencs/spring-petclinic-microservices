@@ -13,6 +13,32 @@ logging:
         web: INFO
 
 ---
+# 本地开发配置（不依赖 Config Server）
+spring:
+  config:
+    activate:
+      on-profile: local
+    import: "optional:"
+  cloud:
+    config:
+      enabled: false
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  server:
+    enableSelfPreservation: false
+
+---
+# Docker 环境配置
 spring:
   config:
     activate:
