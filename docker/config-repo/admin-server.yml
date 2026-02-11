@@ -1,0 +1,8 @@
+server:
+  port: 9090
+
+spring:
+  boot:
+    admin:
+      discovery:
+        ignored-services: config-server

@@ -37,8 +37,12 @@ services:
       - SW_AGENT_NAME=config-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      # 使用本地配置文件（native profile）
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:///config-repo
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/config-repo:/config-repo
     depends_on:
       skywalking-oap:
         condition: service_healthy
@@ -247,12 +251,14 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 2560M
     environment:
       - SW_STORAGE=elasticsearch
       - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
       - SW_HEALTH_CHECKER=default
       - SW_TELEMETRY=prometheus
+      # 降低 JVM 内存使用，避免 OOM
+      - JAVA_OPTS=-Xms512m -Xmx1536m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:12800/internal/l7check"]
       interval: 10s
