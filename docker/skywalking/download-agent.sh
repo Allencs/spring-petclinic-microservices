@@ -14,11 +14,12 @@ echo "正在下载 SkyWalking Java Agent ${SKYWALKING_VERSION}..."
 # 下载 agent
 curl -L -o skywalking-agent.tgz "$DOWNLOAD_URL"
 
-# 解压
-tar -xzf skywalking-agent.tgz
+# 清理旧的 agent 目录，避免 mv 时路径层级错误
+rm -rf agent
 
-# 重命名目录
-mv skywalking-agent agent
+# 解压，直接展开到 agent/ 目录（跳过顶层目录名）
+mkdir -p agent
+tar -xzf skywalking-agent.tgz --strip-components=1 -C agent
 
 # 清理下载文件
 rm skywalking-agent.tgz

@@ -1,3 +1,7 @@
+# 通过以下 Maven 命令配合 buildDocker Profile 来触发构建(需在pom文件中作相应配置)：
+# ./mvnw install -PbuildDocker
+# Maven 会遍历每个子模块，将 project.artifactId 作为镜像标签，调用此 Dockerfile 完成镜像制作
+
 FROM eclipse-temurin:17 AS builder
 WORKDIR application
 ARG ARTIFACT_NAME

@@ -1,0 +1,58 @@
+# ============================================================
+# Heimdall 共享卷 Overlay
+# - 为目标服务挂载命名 /tmp 卷，供 Sidecar Agent 跨项目访问
+# - Sidecar 已移至 heimdall 项目独立编排
+# - 原始 docker-compose.yml 零改动
+# ============================================================
+
+services:
+
+  config-server:
+    volumes:
+      - config-server-tmp:/tmp
+
+  discovery-server:
+    volumes:
+      - discovery-server-tmp:/tmp
+
+  customers-service:
+    volumes:
+      - customers-service-tmp:/tmp
+
+  visits-service:
+    volumes:
+      - visits-service-tmp:/tmp
+
+  vets-service:
+    volumes:
+      - vets-service-tmp:/tmp
+
+  genai-service:
+    volumes:
+      - genai-service-tmp:/tmp
+
+  api-gateway:
+    volumes:
+      - api-gateway-tmp:/tmp
+
+  admin-server:
+    volumes:
+      - admin-server-tmp:/tmp
+
+volumes:
+  config-server-tmp:
+    name: petclinic-config-server-tmp
+  discovery-server-tmp:
+    name: petclinic-discovery-server-tmp
+  customers-service-tmp:
+    name: petclinic-customers-service-tmp
+  visits-service-tmp:
+    name: petclinic-visits-service-tmp
+  vets-service-tmp:
+    name: petclinic-vets-service-tmp
+  genai-service-tmp:
+    name: petclinic-genai-service-tmp
+  api-gateway-tmp:
+    name: petclinic-api-gateway-tmp
+  admin-server-tmp:
+    name: petclinic-admin-server-tmp
