@@ -10,3 +10,14 @@ spring:
         native:
           searchLocations: file:///${GIT_REPO}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: petclinic
+    export:
+      prometheus:
+        enabled: true
