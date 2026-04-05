@@ -36,7 +36,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=config-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
       # 使用本地配置文件（native profile）
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:///config-repo
@@ -65,7 +65,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=discovery-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
@@ -87,7 +87,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=customers-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
@@ -117,7 +117,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=visits-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
@@ -176,7 +176,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=genai-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
     deploy:
@@ -204,7 +204,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=api-gateway
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
     depends_on:
@@ -315,7 +315,7 @@ services:
       - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
       - SW_AGENT_NAME=admin-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
     depends_on:

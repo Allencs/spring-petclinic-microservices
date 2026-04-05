@@ -74,7 +74,29 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-toolkit-logback-1.x</artifactId>
+            <version>9.1.0</version>
+        </dependency>
+    </dependencies>
+
+    <!-- 根据系统自动判断镜像cpu架构 -->
     <profiles>
+        <profile>
+            <id>apple-silicon</id>
+            <activation>
+                <os>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <!-- Automatically use linux/arm64 for Apple Silicon (M1/M2/M3) -->
+                <container.platform>linux/arm64</container.platform>
+            </properties>
+        </profile>
+
         <profile>
             <id>springboot</id>
             <activation>
