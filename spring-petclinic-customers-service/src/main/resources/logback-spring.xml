@@ -2,9 +2,9 @@
 <configuration packagingData="false">
     <!-- SkyWalking TraceId 变量 -->
     <property name="SW_CONSOLE_PATTERN"
-              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) [%blue(%thread)] [%tid] %highlight(%-5level) %green(%logger) - %cyan(%msg%n)"/>
+              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) [%blue(%thread)] [%tid] %highlight(%-5level) %green(%logger) %magenta(%class{36}.%method:%line) - %cyan(%msg%n)"/>
     <property name="SW_FILE_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%tid] %-5level %logger{50} - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%tid] %-5level %logger{50} %class{36}.%method:%line - %msg%n"/>
 
     <!-- 控制台输出（带 TraceId） -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
@@ -34,7 +34,7 @@
     <appender name="SW_GRPC_LOG" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.TraceIdMDCPatternLogbackLayout">
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} %class{36}.%method:%line - %msg%n</pattern>
             </layout>
         </encoder>
     </appender>
@@ -43,7 +43,7 @@
     <appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
         <discardingThreshold>0</discardingThreshold>
-        <includeCallerData>false</includeCallerData>
+        <includeCallerData>true</includeCallerData>
         <maxFlushTime>1000</maxFlushTime>
         <appender-ref ref="file"/>
     </appender>
@@ -52,6 +52,7 @@
     <appender name="ASYNC-SW-GRPC" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
         <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
         <appender-ref ref="SW_GRPC_LOG"/>
     </appender>
 

@@ -26,7 +26,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     healthcheck:
       test: ["CMD", "curl", "-I", "http://config-server:8888"]
@@ -34,7 +34,7 @@ services:
       timeout: 5s
       retries: 10
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/config-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=config-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
@@ -44,6 +44,7 @@ services:
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/config-repo:/config-repo
+      - ./docker/jfr:/jfr
     depends_on:
       skywalking-oap:
         condition: service_healthy
@@ -56,7 +57,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://discovery-server:8761"]
@@ -64,12 +65,13 @@ services:
       timeout: 3s
       retries: 10
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/discovery-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=discovery-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
@@ -84,10 +86,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=customers-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
@@ -97,6 +99,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=123456
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
@@ -115,10 +118,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/visits-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=visits-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
@@ -128,6 +131,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=123456
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
@@ -146,10 +150,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/vets-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=vets-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
@@ -159,6 +163,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=123456
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
@@ -178,16 +183,17 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
       - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/genai-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=genai-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     depends_on:
       config-server:
@@ -205,15 +211,16 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/api-gateway.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=api-gateway
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
@@ -317,15 +324,16 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/skywalking/agent/skywalking-agent.jar
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/admin-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=admin-server
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
       - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
     volumes:
       - ./docker/skywalking/agent:/skywalking/agent
+      - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
