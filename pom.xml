@@ -75,10 +75,19 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Spring Boot 4 split tracing into per-tracer modules. This starter wires the
+             Brave tracer + Zipkin exporter auto-configuration (BraveAutoConfiguration,
+             ZipkinWithBraveTracingAutoConfiguration). Shared by all modules. -->
         <dependency>
-            <groupId>org.apache.skywalking</groupId>
-            <artifactId>apm-toolkit-logback-1.x</artifactId>
-            <version>9.1.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-zipkin</artifactId>
+        </dependency>
+        <!-- Boot 4 moved RestTemplate support out of the web starters. Provides the
+             auto-configured RestTemplateBuilder + ObservationRestTemplateCustomizer so
+             RestTemplate calls are traced and propagate the trace context. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient</artifactId>
         </dependency>
     </dependencies>
 

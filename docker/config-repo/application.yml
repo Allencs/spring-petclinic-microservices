@@ -20,7 +20,7 @@ logging:
   level:
     org.springframework: INFO
 
-# Metrics
+# Metrics & Tracing
 management:
   endpoints:
     web:
@@ -35,4 +35,17 @@ management:
     export:
       prometheus:
         enabled: true
+  # Distributed tracing via Micrometer Tracing (Brave) -> Zipkin.
+  # Native to Spring Boot, so it instruments WebFlux/WebMVC/RestTemplate/WebClient
+  # and propagates context with B3 headers (works on Spring Boot 4).
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    # Spring Boot 4 property path (was management.zipkin.tracing.endpoint in Boot 3.x).
+    # Override ZIPKIN_ENDPOINT to point at another Zipkin-compatible collector
+    # (e.g. your AI performance platform).
+    export:
+      zipkin:
+        endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
 

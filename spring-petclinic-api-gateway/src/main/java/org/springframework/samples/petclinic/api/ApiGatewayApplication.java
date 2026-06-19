@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.api;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -56,10 +57,13 @@ public class ApiGatewayApplication {
         return new RestTemplate();
     }
 
+    // Attach the ObservationRegistry so WebClient calls create client spans and
+    // propagate the trace context (B3 headers) to downstream services. Without this,
+    // the custom @LoadBalanced builder bypasses Spring Boot's WebClient instrumentation.
     @Bean
     @LoadBalanced
-    public WebClient.Builder loadBalancedWebClientBuilder() {
-        return WebClient.builder();
+    public WebClient.Builder loadBalancedWebClientBuilder(ObservationRegistry observationRegistry) {
+        return WebClient.builder().observationRegistry(observationRegistry);
     }
 
     @Value("classpath:/static/index.html")

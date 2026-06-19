@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration packagingData="false">
+    <!-- traceId/spanId are injected into MDC by Micrometer Tracing -->
     <property name="CONSOLE_LOG_PATTERN"
-              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) [%blue(%thread)] %highlight(%-5level) %green(%logger) - %cyan(%msg%n)"/>
+              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) [%blue(%thread)] [%X{traceId:-},%X{spanId:-}] %highlight(%-5level) %green(%logger) - %cyan(%msg%n)"/>
     <!--控制台输出 -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -14,40 +15,25 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/visits.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>1</maxHistory>
-            <!--            <maxFileSize>512MB</maxFileSize>-->
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{50} - %msg%n</pattern>
             <immediateFlush>true</immediateFlush>
         </encoder>
     </appender>
 
     <!-- 异步文件输出appender -->
     <appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
-        <!-- 队列大小，默认256 -->
         <queueSize>512</queueSize>
-        <!-- 丢弃日志的阈值，当队列剩余容量小于此值时开始丢弃TRACE、DEBUG和INFO级别的日志，0表示不丢弃 -->
         <discardingThreshold>0</discardingThreshold>
-        <!-- 是否包含调用者信息，会影响性能，默认false -->
         <includeCallerData>false</includeCallerData>
-        <!-- 最大刷新时间，毫秒 -->
         <maxFlushTime>1000</maxFlushTime>
-        <!-- 引用真实的appender -->
         <appender-ref ref="file"/>
-    </appender>
-
-    <appender name="grpc-log" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender">
-        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc.TraceIdMDCPatternLogbackLayout">
-                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
-            </layout>
-        </encoder>
     </appender>
 
     <root level="INFO">
         <appender-ref ref="stdout"/>
         <appender-ref ref="ASYNC-FILE"/>
-        <appender-ref ref="grpc-log"/>
     </root>
 </configuration>

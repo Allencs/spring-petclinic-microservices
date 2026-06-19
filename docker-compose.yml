@@ -34,20 +34,13 @@ services:
       timeout: 5s
       retries: 10
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/config-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=config-server
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/config-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       # 使用本地配置文件（native profile）
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:///config-repo
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/config-repo:/config-repo
       - ./docker/jfr:/jfr
-    depends_on:
-      skywalking-oap:
-        condition: service_healthy
     ports:
      - 8888:8888
 
@@ -65,17 +58,11 @@ services:
       timeout: 3s
       retries: 10
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/discovery-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=discovery-server
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/discovery-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     depends_on:
       config-server:
-        condition: service_healthy
-      skywalking-oap:
         condition: service_healthy
     ports:
      - 8761:8761
@@ -89,23 +76,17 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=customers-service
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
-        condition: service_healthy
-      skywalking-oap:
         condition: service_healthy
       mysql:
         condition: service_healthy
@@ -121,23 +102,17 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/visits-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=visits-service
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/visits-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
-        condition: service_healthy
-      skywalking-oap:
         condition: service_healthy
       mysql:
         condition: service_healthy
@@ -153,23 +128,17 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/vets-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=vets-service
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/vets-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
-        condition: service_healthy
-      skywalking-oap:
         condition: service_healthy
       mysql:
         condition: service_healthy
@@ -185,12 +154,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-demo}
       - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY:-demo}
       - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/genai-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=genai-service
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/genai-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     deploy:
       resources:
@@ -201,8 +166,6 @@ services:
       config-server:
         condition: service_healthy
       discovery-server:
-        condition: service_healthy
-      skywalking-oap:
         condition: service_healthy
     ports:
      - 8084:8084
@@ -216,24 +179,18 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/api-gateway.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=api-gateway
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/api-gateway.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
-      skywalking-oap:
-        condition: service_healthy
     ports:
      - 8080:8080
 
-  # Elasticsearch for SkyWalking storage
+  # Elasticsearch: stores both Zipkin traces and Filebeat logs
   elasticsearch:
     image: elasticsearch:7.17.12
     container_name: elasticsearch
@@ -260,50 +217,43 @@ services:
     volumes:
       - elasticsearch-data:/Users/hb26933/Container/data/elasticsearch/data
 
-  # SkyWalking OAP Server
-  skywalking-oap:
-    image: apache/skywalking-oap-server:9.7.0
-    container_name: skywalking-oap
+  # Zipkin: receives Micrometer/Brave traces, backed by Elasticsearch
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: zipkin
     deploy:
       resources:
         limits:
-          memory: 2560M
+          memory: 512M
     environment:
-      - SW_STORAGE=elasticsearch
-      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
-      - SW_HEALTH_CHECKER=default
-      - SW_TELEMETRY=prometheus
-      # 降低 JVM 内存使用，避免 OOM
-      - JAVA_OPTS=-Xms512m -Xmx1536m
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:12800/internal/l7check"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=http://elasticsearch:9200
+      - ES_INDEX=zipkin
     depends_on:
       elasticsearch:
         condition: service_healthy
     ports:
-      - 11800:11800  # gRPC port for agent
-      - 12800:12800  # HTTP port for UI
+      - 9411:9411
 
-  # SkyWalking UI
-  skywalking-ui:
-    image: apache/skywalking-ui:9.7.0
-    container_name: skywalking-ui
+  # Filebeat: ships container logs to Elasticsearch (replaces SkyWalking log view)
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.26
+    container_name: filebeat
+    user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    volumes:
+      - ./docker/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
     depends_on:
-      skywalking-oap:
+      elasticsearch:
         condition: service_healthy
-    environment:
-      - SW_OAP_ADDRESS=http://skywalking-oap:12800
-    ports:
-      - 9411:8080  # 使用原来的 9411 端口方便访问
 
-  # Kibana for Elasticsearch management
+  # Kibana: view traces (Elasticsearch) and logs (petclinic-logs-* index)
   kibana:
     image: kibana:7.17.26
     container_name: kibana
@@ -329,19 +279,13 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/admin-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
-      - SW_AGENT_NAME=admin-server
-      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
-      - SW_AGENT_TRACE_IGNORE_PATH=HEAD:/,GET:/actuator/**,POST:/actuator/**,GET:/health/**,GET:/prometheus,GET:/metrics
+      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/admin-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
     volumes:
-      - ./docker/skywalking/agent:/skywalking/agent
       - ./docker/jfr:/jfr
     depends_on:
       config-server:
         condition: service_healthy
       discovery-server:
-        condition: service_healthy
-      skywalking-oap:
         condition: service_healthy
     ports:
      - 9090:9090
