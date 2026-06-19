@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.api.boundary.web;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
 import org.springframework.samples.petclinic.api.application.CustomersServiceClient;
+import org.springframework.samples.petclinic.api.application.ReportServiceClient;
 import org.springframework.samples.petclinic.api.application.VisitsServiceClient;
 import org.springframework.samples.petclinic.api.dto.OwnerDetails;
 import org.springframework.samples.petclinic.api.dto.Visits;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -41,13 +43,17 @@ public class ApiGatewayController {
 
     private final VisitsServiceClient visitsServiceClient;
 
+    private final ReportServiceClient reportServiceClient;
+
     private final ReactiveCircuitBreakerFactory cbFactory;
 
     public ApiGatewayController(CustomersServiceClient customersServiceClient,
                                 VisitsServiceClient visitsServiceClient,
+                                ReportServiceClient reportServiceClient,
                                 ReactiveCircuitBreakerFactory cbFactory) {
         this.customersServiceClient = customersServiceClient;
         this.visitsServiceClient = visitsServiceClient;
+        this.reportServiceClient = reportServiceClient;
         this.cbFactory = cbFactory;
     }
 
@@ -63,6 +69,15 @@ public class ApiGatewayController {
                     .map(addVisitsToOwner(owner))
             );
 
+    }
+
+    /**
+     * Deep call chain entry point used for performance/tracing validation:
+     * api-gateway -> customers-service -> visits-service -> vets-service -> genai-service.
+     */
+    @GetMapping(value = "owners/{ownerId}/report")
+    public Mono<Map<String, Object>> getOwnerReport(final @PathVariable int ownerId) {
+        return reportServiceClient.getOwnerReport(ownerId);
     }
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {

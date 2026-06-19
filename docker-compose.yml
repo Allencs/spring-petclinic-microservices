@@ -180,9 +180,11 @@ services:
     image: springcommunity/spring-petclinic-genai-service
     container_name: genai-service
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
-      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      # Fall back to a placeholder key when none is provided, so the service can
+      # still start and register in Eureka (the report chain does not call the LLM).
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-demo}
+      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY:-demo}
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
       - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -javaagent:/skywalking/agent/skywalking-agent.jar -XX:StartFlightRecording=name=petclinic,filename=/jfr/genai-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SW_AGENT_NAME=genai-service
       - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800

@@ -7,6 +7,7 @@ import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4JAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.samples.petclinic.api.application.CustomersServiceClient;
+import org.springframework.samples.petclinic.api.application.ReportServiceClient;
 import org.springframework.samples.petclinic.api.application.VisitsServiceClient;
 import org.springframework.samples.petclinic.api.dto.OwnerDetails;
 import org.springframework.samples.petclinic.api.dto.PetDetails;
@@ -30,6 +31,9 @@ class ApiGatewayControllerTest {
 
     @MockitoBean
     private VisitsServiceClient visitsServiceClient;
+
+    @MockitoBean
+    private ReportServiceClient reportServiceClient;
 
     @Autowired
     private WebTestClient client;
