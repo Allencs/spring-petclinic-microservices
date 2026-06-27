@@ -34,13 +34,22 @@ services:
       timeout: 5s
       retries: 10
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/config-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/config-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       # 使用本地配置文件（native profile）
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCHLOCATIONS=file:///config-repo
+      - OTEL_SERVICE_NAME=config-server
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/config-repo:/config-repo
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     ports:
      - 8888:8888
 
@@ -58,9 +67,18 @@ services:
       timeout: 3s
       retries: 10
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/discovery-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/discovery-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - OTEL_SERVICE_NAME=discovery-server
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     depends_on:
       config-server:
         condition: service_healthy
@@ -73,16 +91,25 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1280M
+          memory: 1536M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
+      - OTEL_SERVICE_NAME=customers-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     depends_on:
       config-server:
         condition: service_healthy
@@ -102,13 +129,22 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/visits-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/visits-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
+      - OTEL_SERVICE_NAME=visits-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     depends_on:
       config-server:
         condition: service_healthy
@@ -128,13 +164,22 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/vets-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/vets-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=123456
+      - OTEL_SERVICE_NAME=vets-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     depends_on:
       config-server:
         condition: service_healthy
@@ -154,9 +199,18 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-demo}
       - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY:-demo}
       - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/genai-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/genai-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - OTEL_SERVICE_NAME=genai-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     deploy:
       resources:
         limits:
@@ -179,9 +233,18 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/api-gateway.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/api-gateway.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - OTEL_SERVICE_NAME=api-gateway
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     depends_on:
       config-server:
         condition: service_healthy
@@ -190,85 +253,58 @@ services:
     ports:
      - 8080:8080
 
-  # Elasticsearch: stores both Zipkin traces and Filebeat logs
-  elasticsearch:
-    image: elasticsearch:7.17.12
-    container_name: elasticsearch
-    deploy:
-      resources:
-        limits:
-          memory: 2048M
-    environment:
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    ports:
-      - 9200:9200
+  # ===== 可观测性后端：Tempo(链路) + Loki(日志) + OTel Collector =====
+  # 旧的 Elasticsearch / Zipkin / Filebeat / Kibana 已被 Tempo + Loki 取代，
+  # 应用经 OTel Agent -> OTLP -> Collector -> Tempo/Loki，统一在 Grafana 查看并联动。
+  # 如需恢复 ES 方案，可从 git 历史还原。
+
+  # Tempo: 接收 OTLP 链路（本地文件存储），供 Grafana 查询
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo.yaml"]
     volumes:
-      - elasticsearch-data:/Users/hb26933/Container/data/elasticsearch/data
-
-  # Zipkin: receives Micrometer/Brave traces, backed by Elasticsearch
-  zipkin:
-    image: openzipkin/zipkin:3
-    container_name: zipkin
+      - ./docker/tempo/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
     deploy:
       resources:
         limits:
-          memory: 512M
-    environment:
-      - STORAGE_TYPE=elasticsearch
-      - ES_HOSTS=http://elasticsearch:9200
-      - ES_INDEX=zipkin
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+          memory: 1280M
     ports:
-      - 9411:9411
+      - 3200:3200
 
-  # Filebeat: ships container logs to Elasticsearch (replaces SkyWalking log view)
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:7.17.26
-    container_name: filebeat
-    user: root
-    command: ["filebeat", "-e", "--strict.perms=false"]
+  # Loki: 接收 OTLP 日志（Loki 3.x 原生 /otlp 入口），供 Grafana 查询
+  loki:
+    image: grafana/loki:3.3.2
+    container_name: loki
+    command: ["-config.file=/etc/loki/loki.yaml"]
     volumes:
-      - ./docker/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki-data:/loki
     deploy:
       resources:
         limits:
-          memory: 512M
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-
-  # Kibana: view traces (Elasticsearch) and logs (petclinic-logs-* index)
-  kibana:
-    image: kibana:7.17.26
-    container_name: kibana
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - I18N_LOCALE=zh-CN
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
+          memory: 768M
     ports:
-      - 5601:5601
+      - 3100:3100
+
+  # OpenTelemetry Collector: 统一接收应用 OTLP，扇出到 Tempo(链路) / Loki(日志)
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.119.0
+    container_name: otel-collector
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./docker/otel-collector/config.yaml:/etc/otel/config.yaml:ro
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    ports:
+      - 4317:4317
+      - 4318:4318
+    depends_on:
+      - tempo
+      - loki
 
   admin-server:
     image: springcommunity/spring-petclinic-admin-server
@@ -279,9 +315,18 @@ services:
           memory: 1280M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/admin-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xmx512m -XX:MaxMetaspaceSize=256m -XX:StartFlightRecording=name=petclinic,filename=/jfr/admin-server.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - OTEL_SERVICE_NAME=admin-server
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=petclinic,deployment.environment=docker
+      - MANAGEMENT_TRACING_ENABLED=false
     volumes:
       - ./docker/jfr:/jfr
+      - ./docker/otel:/otel:ro
     depends_on:
       config-server:
         condition: service_healthy
@@ -315,12 +360,25 @@ services:
       resources:
         limits:
           memory: 256M
+    depends_on:
+      - prometheus-server
+      - tempo
+      - loki
     ports:
     - 3030:3000
 
   prometheus-server:
     build: ./docker/prometheus
     container_name: prometheus-server
+    # 开启 exemplar 存储，让 Grafana 指标曲线可直接跳转到 Tempo trace
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --enable-feature=exemplar-storage
+      # 接收 Tempo metrics-generator remote_write 过来的 service-graph/span-metrics 指标
+      - --web.enable-remote-write-receiver
     deploy:
       resources:
         limits:
@@ -329,5 +387,7 @@ services:
     - 9091:9090
 
 volumes:
-  elasticsearch-data:
+  tempo-data:
+    driver: local
+  loki-data:
     driver: local

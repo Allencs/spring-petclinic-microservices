@@ -2,6 +2,18 @@
 server:
   shutdown: graceful
 
+# 服务间调用的超时时间（可在配置中心统一调整，支持 3s/500ms/1m 等格式）
+# 默认值适用于除 api-gateway 外的内部调用：connect + read 合计 3 秒。
+# api-gateway 在 api-gateway.yml 中单独覆盖为 5 秒。
+petclinic:
+  client:
+    # 建立连接的超时（RestTemplate）
+    connect-timeout: 1s
+    # 读取响应的超时（RestTemplate）
+    read-timeout: 2s
+    # 整体响应超时（WebClient / Reactor Netty）
+    response-timeout: 3s
+
 eureka:
   client:
     serviceUrl:
@@ -14,8 +26,20 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
+  # 链路由 OTel Java Agent 负责。Spring Boot 4 中 management.tracing.enabled=false
+  # 无法停用 Brave/Zipkin 自动配置，这里直接排除，彻底关闭应用内置链路，
+  # 避免与 Agent 双重埋点（应用 Brave 会徒劳地向 localhost:9411 发送 span）。
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.micrometer.tracing.autoconfigure.MicrometerTracingAutoConfiguration
+      - org.springframework.boot.micrometer.tracing.brave.autoconfigure.BraveAutoConfiguration
+      - org.springframework.boot.micrometer.tracing.brave.autoconfigure.zipkin.ZipkinWithBraveTracingAutoConfiguration
+      - org.springframework.boot.zipkin.autoconfigure.ZipkinAutoConfiguration
 
 # Logging
+# 日志输出到 stdout（各服务 logback console appender），由 OTel Java Agent 进程内
+# 桥接为 OTLP → otel-collector → Loki。服务实例区分由 OTel 资源属性
+# service.instance.id 承担，无需再用 ECS service.node.name。
 logging:
   level:
     org.springframework: INFO
@@ -35,17 +59,8 @@ management:
     export:
       prometheus:
         enabled: true
-  # Distributed tracing via Micrometer Tracing (Brave) -> Zipkin.
-  # Native to Spring Boot, so it instruments WebFlux/WebMVC/RestTemplate/WebClient
-  # and propagates context with B3 headers (works on Spring Boot 4).
+  # 链路改由 OpenTelemetry Java Agent（零代码）采集并经 OTLP 发往 Collector -> Tempo。
+  # 关闭 Spring 自带的 Micrometer/Brave 链路导出，避免与 Agent 双重埋点。
   tracing:
-    enabled: true
-    sampling:
-      probability: 1.0
-    # Spring Boot 4 property path (was management.zipkin.tracing.endpoint in Boot 3.x).
-    # Override ZIPKIN_ENDPOINT to point at another Zipkin-compatible collector
-    # (e.g. your AI performance platform).
-    export:
-      zipkin:
-        endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
+    enabled: false
 

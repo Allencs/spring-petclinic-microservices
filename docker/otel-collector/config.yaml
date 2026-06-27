@@ -1,0 +1,55 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # 软内存保护：超过软限即拒收/丢弃，避免容器被内核 OOM(137) 杀掉。
+  # 数值按容器内存上限 768M 设定，必须放在每条 pipeline 的最前面。
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 600
+    spike_limit_mib: 150
+  batch:
+    timeout: 5s
+  resource:
+    attributes:
+      - key: collector
+        value: petclinic-otel
+        action: upsert
+  # 丢弃健康检查 / actuator 抓取等噪音 span（server 端按 url.path/http.route，
+  # client 端按 url.full 匹配；任一条件命中即丢弃）。error_mode=ignore 避免属性缺失报错。
+  filter/noise:
+    error_mode: ignore
+    traces:
+      span:
+        - 'IsMatch(attributes["url.path"], "/actuator(/.*)?$")'
+        - 'IsMatch(attributes["url.path"], "/health(/.*)?$")'
+        - 'IsMatch(attributes["http.route"], "/actuator(/.*)?$")'
+        - 'IsMatch(attributes["http.target"], "/actuator(/.*)?$")'
+        - 'IsMatch(attributes["url.full"], ".*/actuator(/.*)?$")'
+        - 'IsMatch(attributes["url.full"], ".*/health(/.*)?$")'
+
+exporters:
+  # 链路 -> Tempo OTLP 接收口
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  # 日志 -> Loki 原生 OTLP 入口 (Loki 3.x)
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, filter/noise, batch, resource]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlphttp/loki]

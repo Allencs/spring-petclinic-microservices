@@ -1,42 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration packagingData="false">
-    <!-- traceId/spanId are injected into MDC by Micrometer Tracing -->
-    <property name="CONSOLE_PATTERN"
-              value="%yellow(%date{yyyy-MM-dd HH:mm:ss}) [%blue(%thread)] [%X{traceId:-},%X{spanId:-}] %highlight(%-5level) %green(%logger) %magenta(%class{36}.%method:%line) - %cyan(%msg%n)"/>
-    <property name="FILE_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{50} %class{36}.%method:%line - %msg%n"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-    <!-- 控制台输出（带 TraceId） -->
-    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>${CONSOLE_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
-    <!-- 文件输出（带 TraceId） -->
-    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/customers.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/customers.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${FILE_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
-    <!-- 异步文件输出 appender -->
-    <appender name="ASYNC-FILE" class="ch.qos.logback.classic.AsyncAppender">
-        <queueSize>512</queueSize>
-        <discardingThreshold>0</discardingThreshold>
-        <includeCallerData>true</includeCallerData>
-        <maxFlushTime>1000</maxFlushTime>
-        <appender-ref ref="file"/>
-    </appender>
-
+    <!-- 输出到 stdout：日志由 OpenTelemetry Java Agent 在进程内桥接成 OTLP，
+         经 otel-collector 上报到 Loki；保留 console 同时让 docker logs 可读 -->
     <root level="INFO">
-        <appender-ref ref="stdout"/>
-        <appender-ref ref="ASYNC-FILE"/>
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

@@ -1,6 +1,16 @@
 server:
   port: 8080
 
+# api-gateway 的内部调用超时统一为 5 秒，覆盖 application.yml 中的默认值（3 秒）。
+petclinic:
+  client:
+    connect-timeout: 2s
+    read-timeout: 3s
+    response-timeout: 5s
+  circuitbreaker:
+    # Resilience4j 熔断器的 TimeLimiter 超时
+    timeout: 5s
+
 spring:
   cloud:
     gateway:

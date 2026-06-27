@@ -30,8 +30,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -53,8 +56,13 @@ public class ApiGatewayApplication {
 
     @Bean
     @LoadBalanced
-    RestTemplate loadBalancedRestTemplate() {
-        return new RestTemplate();
+    RestTemplate loadBalancedRestTemplate(
+            @Value("${petclinic.client.connect-timeout:2s}") Duration connectTimeout,
+            @Value("${petclinic.client.read-timeout:3s}") Duration readTimeout) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeout);
+        factory.setReadTimeout(readTimeout);
+        return new RestTemplate(factory);
     }
 
     // Attach the ObservationRegistry so WebClient calls create client spans and
@@ -62,8 +70,12 @@ public class ApiGatewayApplication {
     // the custom @LoadBalanced builder bypasses Spring Boot's WebClient instrumentation.
     @Bean
     @LoadBalanced
-    public WebClient.Builder loadBalancedWebClientBuilder(ObservationRegistry observationRegistry) {
-        return WebClient.builder().observationRegistry(observationRegistry);
+    public WebClient.Builder loadBalancedWebClientBuilder(ObservationRegistry observationRegistry,
+            @Value("${petclinic.client.response-timeout:5s}") Duration responseTimeout) {
+        HttpClient httpClient = HttpClient.create().responseTimeout(responseTimeout);
+        return WebClient.builder()
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
+            .observationRegistry(observationRegistry);
     }
 
     @Value("classpath:/static/index.html")
@@ -85,10 +97,11 @@ public class ApiGatewayApplication {
      * Default Resilience4j circuit breaker configuration
      */
     @Bean
-    public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
+    public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer(
+            @Value("${petclinic.circuitbreaker.timeout:5s}") Duration circuitBreakerTimeout) {
         return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
             .circuitBreakerConfig(CircuitBreakerConfig.ofDefaults())
-            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(10)).build())
+            .timeLimiterConfig(TimeLimiterConfig.custom().timeoutDuration(circuitBreakerTimeout).build())
             .build());
     }
 }

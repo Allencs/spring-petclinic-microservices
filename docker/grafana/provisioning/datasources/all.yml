@@ -1,13 +1,70 @@
 # config file version
 apiVersion: 1
 
-# list of datasources to insert/update depending what's available in the database
+# 删除旧的同名数据源，确保 uid/联动配置每次启动都按本文件重建
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
 datasources:
-- name: Prometheus
-  type: prometheus
-  access: proxy
-  org_id: 1
-  url: http://prometheus-server:9090
-  is_default: true
-  version: 1
-  editable: true
+  # 指标：保留 Prometheus，并把 exemplar 关联到 Tempo（指标曲线一键跳 trace）
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    org_id: 1
+    url: http://prometheus-server:9090
+    is_default: true
+    version: 2
+    editable: true
+    jsonData:
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo
+
+  # 链路：Tempo，配置 Trace -> Logs / Metrics / 服务拓扑
+  - name: Tempo
+    uid: tempo
+    type: tempo
+    access: proxy
+    org_id: 1
+    url: http://tempo:3200
+    version: 1
+    editable: true
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+        filterBySpanID: false
+        tags:
+          - key: service.name
+            value: service_name
+      tracesToMetrics:
+        datasourceUid: prometheus
+      serviceMap:
+        datasourceUid: prometheus
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      traceQuery:
+        timeShiftEnabled: true
+
+  # 日志：Loki，派生字段从结构化元数据 trace_id 一键跳回 Tempo
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    org_id: 1
+    url: http://loki:3100
+    version: 1
+    editable: true
+    jsonData:
+      derivedFields:
+        - name: TraceID
+          matcherType: label
+          matcherRegex: trace_id
+          url: '$${__value.raw}'
+          datasourceUid: tempo

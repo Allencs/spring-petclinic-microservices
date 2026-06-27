@@ -1,5 +1,8 @@
 package org.springframework.samples.petclinic.visits.web;
 
+import java.time.Duration;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +22,12 @@ class ReportClientConfig {
 
     @Bean
     @LoadBalanced
-    RestTemplate reportRestTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+    RestTemplate reportRestTemplate(RestTemplateBuilder builder,
+            @Value("${petclinic.client.connect-timeout:1s}") Duration connectTimeout,
+            @Value("${petclinic.client.read-timeout:2s}") Duration readTimeout) {
+        return builder
+            .connectTimeout(connectTimeout)
+            .readTimeout(readTimeout)
+            .build();
     }
 }

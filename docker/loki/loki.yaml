@@ -1,0 +1,52 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  # Loki 3.x：允许结构化元数据（OTLP 的 trace_id/span_id 落在此处，便于联动且不爆基数）
+  allow_structured_metadata: true
+  volume_enabled: true
+  retention_period: 168h
+  # 仅把少量稳定、低基数的资源属性作为索引 label；
+  # 其余资源属性 + scope/log 属性 + trace_id/span_id 一律进 structured metadata，
+  # 避免高基数 trace_id 当 label 造成 stream 爆炸。
+  # 未被显式 index_label 的资源属性 + scope/log 属性 + trace_id/span_id
+  # 默认进入 structured metadata，无需再显式声明（空 attributes 会被 Loki 判为非法）。
+  otlp_config:
+    resource_attributes:
+      ignore_defaults: true
+      attributes_config:
+        - action: index_label
+          attributes:
+            - service.name
+            - service.namespace
+            - deployment.environment
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem

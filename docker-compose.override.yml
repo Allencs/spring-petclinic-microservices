@@ -2,7 +2,8 @@
 # Heimdall 共享卷 Overlay
 # - 为目标服务挂载命名 /tmp 卷，供 Sidecar Agent 跨项目访问
 # - Sidecar 已移至 heimdall 项目独立编排
-# - 原始 docker-compose.yml 零改动
+# - 日志已迁移到 OpenTelemetry：各服务输出到 stdout，由 OTel Java Agent
+#   在进程内桥接为 OTLP → otel-collector → Loki（不再写文件 / 不再用 Filebeat）
 # ============================================================
 
 services:
