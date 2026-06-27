@@ -13,6 +13,7 @@ target/
 # IntelliJ IDEA
 .idea
 *.iml
+*.jfr
 
 # Visual Studio Code
 .factorypath
