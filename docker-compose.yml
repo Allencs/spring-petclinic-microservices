@@ -337,9 +337,11 @@ services:
 
   ## Grafana / Prometheus monitoring
 
+  # gcr.io 在国内常超时；改用 Docker Hub 镜像（官方 ghcr.io/google/cadvisor 的同步）
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    image: dockette/cadvisor:0.56.2
     container_name: cadvisor
+    privileged: true
     ports:
       - 8085:8080
     volumes:
@@ -348,6 +350,8 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
     deploy:
       resources:
         limits:
