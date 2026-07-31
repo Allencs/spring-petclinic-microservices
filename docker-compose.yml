@@ -94,7 +94,7 @@ services:
           memory: 1536M
           cpus: "2"
     environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
+      - JAVA_TOOL_OPTIONS=-javaagent:/otel/opentelemetry-javaagent.jar -Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m -XX:+UseContainerSupport -XX:StartFlightRecording=name=petclinic,filename=/jfr/customers-service.jfr,maxsize=256m,disk=true,dumponexit=true,settings=default
       - SPRING_PROFILES_ACTIVE=docker,mysql
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
