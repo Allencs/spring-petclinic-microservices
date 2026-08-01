@@ -1,9 +1,14 @@
 # ============================================================
-# Heimdall 共享卷 Overlay
+# Heimdall 共享卷 / 共享网络 Overlay
 # - 为目标服务挂载命名 /tmp 卷，供 Sidecar Agent 跨项目访问
 # - Sidecar 已移至 heimdall 项目独立编排
 # - 日志已迁移到 OpenTelemetry：各服务输出到 stdout，由 OTel Java Agent
 #   在进程内桥接为 OTLP → otel-collector → Loki（不再写文件 / 不再用 Filebeat）
+# - 三个可观测后端接入 heimdall-net，供 MAS / UI 按容器名直连
+#
+# ⚠ 启动顺序：heimdall-net 由 heimdall 主 compose 创建，故必须先启动 heimdall
+#   再启动本项目，否则报 "network heimdall-net declared as external, but
+#   could not be found"。兜底：docker network create heimdall-net
 # ============================================================
 
 services:
@@ -39,6 +44,30 @@ services:
   admin-server:
     volumes:
       - admin-server-tmp:/tmp
+
+  # ── 可观测后端：额外接入 heimdall-net ──────────────────────────
+  # 一旦服务显式声明 networks，compose 便不再自动接入 default，
+  # 故必须把 default 一并列出，否则会脱离 petclinic 内部网络
+  # （prometheus 抓取 target、tempo remote_write 全部依赖它）。
+  # 这样容器重建后自动接线，无需再手动 docker network connect。
+  prometheus-server:
+    networks:
+      - default
+      - heimdall-net
+
+  tempo:
+    networks:
+      - default
+      - heimdall-net
+
+  loki:
+    networks:
+      - default
+      - heimdall-net
+
+networks:
+  heimdall-net:
+    external: true
 
 volumes:
   config-server-tmp:
