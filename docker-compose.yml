@@ -383,10 +383,18 @@ services:
       - --enable-feature=exemplar-storage
       # 接收 Tempo metrics-generator remote_write 过来的 service-graph/span-metrics 指标
       - --web.enable-remote-write-receiver
+      # 历史数据保留：时间与磁盘双阈值，先到者触发清理。
+      # size 阈值兜底防止长时间运行把宿主机磁盘写满。
+      - --storage.tsdb.retention.time=35d
+      - --storage.tsdb.retention.size=10GB
+    volumes:
+      - prometheus-data:/prometheus
     deploy:
       resources:
         limits:
-          memory: 256M
+          # 256M 曾在采集目标增多时被 OOM kill（exit 137），TSDB head + WAL
+          # 常驻就接近该上限，故上调至 1G。
+          memory: 1G
     ports:
     - 9091:9090
 
@@ -394,4 +402,6 @@ volumes:
   tempo-data:
     driver: local
   loki-data:
+    driver: local
+  prometheus-data:
     driver: local
