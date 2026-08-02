@@ -20,18 +20,36 @@ processors:
       - key: collector
         value: petclinic-otel
         action: upsert
-  # 丢弃健康检查 / actuator 抓取等噪音 span（server 端按 url.path/http.route，
-  # client 端按 url.full 匹配；任一条件命中即丢弃）。error_mode=ignore 避免属性缺失报错。
+  # 丢弃基础设施噪音 span（server 端按 url.path/http.route，client 端按 url.full
+  # 匹配；任一条件命中即丢弃）。error_mode=ignore 避免属性缺失报错。
+  #
+  # 这类噪音不只是浪费存储：Tempo 搜索命中数超过 limit 时会在完成部分任务后
+  # 取消其余任务（含持有最新数据的 ingester），导致「最近 Trace」列表拿到的是
+  # 随机切片而非最新链路。把噪音压下去，业务 trace 才能稳定出现。
   filter/noise:
     error_mode: ignore
     traces:
       span:
+        # 健康检查 / actuator 抓取
         - 'IsMatch(attributes["url.path"], "/actuator(/.*)?$")'
         - 'IsMatch(attributes["url.path"], "/health(/.*)?$")'
         - 'IsMatch(attributes["http.route"], "/actuator(/.*)?$")'
         - 'IsMatch(attributes["http.target"], "/actuator(/.*)?$")'
         - 'IsMatch(attributes["url.full"], ".*/actuator(/.*)?$")'
         - 'IsMatch(attributes["url.full"], ".*/health(/.*)?$")'
+        # Eureka 注册 / 心跳 / 增量拉取 / 副本复制：每实例每 30s 一轮，
+        # 数量级压过业务链路。server 端记 url.path，client 端记 url.full。
+        - 'IsMatch(attributes["url.path"], "^/eureka/")'
+        - 'IsMatch(attributes["url.full"], "/eureka/")'
+        # config-server 配置轮询(HEAD /)与 Eureka 首页(GET /)。限定服务名，
+        # 以免误伤 api-gateway 上承载的前端首页请求。
+        - 'attributes["url.path"] == "/" and IsMatch(resource.attributes["service.name"], "^(config-server|discovery-server)$")'
+        # HikariCP 连接池维护与 JDBC 会话初始化：脱离请求上下文产生，既污染
+        # trace 列表，也让业务火焰图塞满与业务无关的 span。真正的 SQL 执行
+        # (SELECT / Prepare statement / Execute prepared statement / Commit) 保留。
+        - 'IsMatch(name, "^(Ping|Create connection|Load server variables)$")'
+        - 'IsMatch(name, "^(Get|Set) variable ")'
+        - 'IsMatch(name, "^Set transaction access mode ")'
 
 exporters:
   # 链路 -> Tempo OTLP 接收口

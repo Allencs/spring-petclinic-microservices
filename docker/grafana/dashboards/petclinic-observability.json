@@ -164,13 +164,14 @@
     },
     {
       "type": "table",
-      "title": "最近 Trace (点击 Trace ID 查看火焰图 / 跳转日志)",
+      "title": "最近 Trace — 服务入口 (点击 Trace ID 查看火焰图 / 跳转日志)",
+      "description": "只列业务 server 入口 span。查询必须保持足够的选择性：命中数超过 limit 时 Tempo 会在部分搜索任务返回后取消其余任务（含持有最新数据的 ingester），拿到的是随机切片而非最新链路，调大 limit 也无效。排除条件同时兜住 otel-collector 噪音过滤上线前已落盘的历史数据（block_retention 48h）。",
       "datasource": { "type": "tempo", "uid": "tempo" },
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 34 },
       "id": 9,
       "options": { "showHeader": true },
       "targets": [
-        { "refId": "A", "datasource": { "type": "tempo", "uid": "tempo" }, "queryType": "traceql", "query": "{ resource.service.name =~ \"$service\" }", "limit": 20, "tableType": "traces" }
+        { "refId": "A", "datasource": { "type": "tempo", "uid": "tempo" }, "queryType": "traceql", "query": "{ resource.service.name =~ \"$service\" && kind = server && span.url.path !~ \"/eureka.*\" && span.url.path != \"/\" }", "limit": 50, "tableType": "traces" }
       ]
     }
   ]

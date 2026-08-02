@@ -363,7 +363,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          # 256M 是给旧版 Grafana 定的，13.x 首次启动要做 DB 迁移并安装自带的
+          # app 插件，峰值会超过 256M 而被 OOM kill（exit 137）。稳态约 110M。
+          memory: 1G
     depends_on:
       - prometheus-server
       - tempo
